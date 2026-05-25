@@ -80,7 +80,7 @@ body {
   left: 0;
   height: 2px;
   background: var(--accent);
-  animation: toastTimer 6s linear forwards;
+  animation: toastTimer var(--toast-duration, 6000ms) linear forwards;
 }
 
 .toast.warning { border-left: 3px solid var(--sensitive); }
@@ -606,17 +606,10 @@ footer {
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
 .loading { animation: pulse 1.5s ease-in-out infinite; }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+/* Valores numéricos se animan suavemente via CSS transition en el contenedor */
+.metric-val, .aqi-chip, .pred-text, .trend-badge {
+  transition: all 0.4s ease;
 }
-
-.station-card { animation: fadeIn 0.3s ease-out both; }
-.station-card:nth-child(1) { animation-delay: 0.03s; }
-.station-card:nth-child(2) { animation-delay: 0.06s; }
-.station-card:nth-child(3) { animation-delay: 0.09s; }
-.station-card:nth-child(4) { animation-delay: 0.12s; }
-.station-card:nth-child(5) { animation-delay: 0.15s; }
 
 /* ── Responsive ── */
 @media (min-width: 1100px) {
