@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AirSim Monsefú — Monitoreo de Calidad del Aire</title>
 
-  <!-- PWA Meta Tags -->
-  <meta name="theme-color" content="#00b4d8">
+  <!-- PWA -->
+  <meta name="theme-color" content="#0b0f14">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="AirSim">
@@ -18,11 +18,16 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="toast-container"></div>
+
   <header>
     <div class="header-content">
-      <h1>AirSim Monsefú</h1>
-      <p class="subtitle">Plataforma de Monitoreo y Simulación de Calidad del Aire Urbano</p>
-      <span class="badge">Red de sensores simulada · PWA</span>
+      <div class="header-brand">
+        <div class="header-logo">A</div>
+        <h1>Air<span>Sim</span> Monsefú</h1>
+      </div>
+      <p class="subtitle">Monitoreo y Simulación de Calidad del Aire Urbano</p>
+      <span class="badge">Sensores simulados · PWA</span>
     </div>
   </header>
 
@@ -31,54 +36,60 @@
   </div>
 
   <main>
-    <section class="alerts-bar" id="alerts-bar"></section>
-
     <div class="dashboard">
       <div class="map-container">
         <div id="map"></div>
         <div class="map-controls">
-          <button id="btn-heatmap" class="ctrl-btn" title="Mapa de dispersión">Dispersión AQI</button>
-          <button id="btn-route" class="ctrl-btn" title="Rutas saludables">Ruta Saludable</button>
+          <button id="btn-heatmap" class="ctrl-btn">Dispersión</button>
+          <button id="btn-route" class="ctrl-btn">Ruta Saludable</button>
         </div>
         <div id="route-panel" class="route-panel hidden">
-          <h3>Rutas Saludables</h3>
-          <p class="route-instructions">Haz clic en el mapa para seleccionar <strong>origen</strong> y <strong>destino</strong>.</p>
+          <h3>Ruta Saludable</h3>
+          <p class="route-instructions" id="route-instructions">Haz clic en el mapa para seleccionar el <strong>punto de origen</strong>.</p>
           <div class="route-mode">
             <label><input type="radio" name="modo" value="caminando" checked> Caminando</label>
             <label><input type="radio" name="modo" value="corriendo"> Corriendo</label>
             <label><input type="radio" name="modo" value="bici"> Bicicleta</label>
           </div>
           <div id="route-points">
-            <p id="route-origin">Origen: <em>sin definir</em></p>
-            <p id="route-dest">Destino: <em>sin definir</em></p>
+            <div class="route-point" id="route-origin">
+              <div class="route-dot origin"></div>
+              <span>Origen: sin definir</span>
+            </div>
+            <div class="route-point" id="route-dest">
+              <div class="route-dot dest"></div>
+              <span>Destino: sin definir</span>
+            </div>
           </div>
-          <button id="btn-calc-route" class="ctrl-btn" disabled>Calcular Ruta</button>
-          <button id="btn-clear-route" class="ctrl-btn secondary">Limpiar</button>
+          <div class="route-actions">
+            <button id="btn-calc-route" class="ctrl-btn" disabled>Calcular</button>
+            <button id="btn-clear-route" class="ctrl-btn secondary">Limpiar</button>
+          </div>
           <div id="route-result" class="hidden"></div>
         </div>
       </div>
 
       <aside class="sidebar">
         <div class="panel" id="stations-panel">
-          <h2>Estaciones</h2>
+          <h2>Estaciones de Monitoreo</h2>
           <div id="stations-list"></div>
         </div>
 
         <div class="panel">
-          <h2>Histórico PM2.5</h2>
-          <canvas id="chart-pm25"></canvas>
+          <h2>PM2.5 — Últimas 6 horas</h2>
+          <div class="chart-wrap"><canvas id="chart-pm25"></canvas></div>
         </div>
 
         <div class="panel">
-          <h2>Histórico AQI</h2>
-          <canvas id="chart-aqi"></canvas>
+          <h2>Índice AQI — Últimas 6 horas</h2>
+          <div class="chart-wrap"><canvas id="chart-aqi"></canvas></div>
         </div>
       </aside>
     </div>
   </main>
 
   <footer>
-    <p>AirSim Monsefú — MVP Universitario · Sensores simulados por software · Datos no oficiales</p>
+    AirSim Monsefú — MVP Universitario · Sensores simulados por software · Datos no oficiales
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
