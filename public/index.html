@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AirSim Monsefú — Monitoreo de Calidad del Aire</title>
+
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#00b4d8">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AirSim">
+  <meta name="description" content="Monitoreo y simulación de calidad del aire urbano en Monsefú, Lambayeque, Perú">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icons/icon-192.svg">
+
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -12,9 +22,13 @@
     <div class="header-content">
       <h1>AirSim Monsefú</h1>
       <p class="subtitle">Plataforma de Monitoreo y Simulación de Calidad del Aire Urbano</p>
-      <span class="badge">Red de sensores simulada</span>
+      <span class="badge">Red de sensores simulada · PWA</span>
     </div>
   </header>
+
+  <div id="offline-banner" class="offline-banner hidden">
+    Sin conexión — mostrando datos en caché
+  </div>
 
   <main>
     <section class="alerts-bar" id="alerts-bar"></section>
@@ -64,7 +78,7 @@
   </main>
 
   <footer>
-    <p>AirSim Monsefú — MVP Universitario | Sensores simulados por software | Datos no oficiales</p>
+    <p>AirSim Monsefú — MVP Universitario · Sensores simulados por software · Datos no oficiales</p>
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

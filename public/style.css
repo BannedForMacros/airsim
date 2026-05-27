@@ -149,6 +149,15 @@ main { max-width: 1400px; margin: 0 auto; padding: 1rem; }
 
 .hidden { display: none !important; }
 
+.offline-banner {
+  background: var(--sensitive);
+  color: var(--bg);
+  text-align: center;
+  padding: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .sidebar {
   display: flex;
   flex-direction: column;

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="34" fill="#0f1923"/>
+  <circle cx="96" cy="96" r="60" fill="none" stroke="#00b4d8" stroke-width="5"/>
+  <circle cx="96" cy="72" r="10" fill="#00e400"/>
+  <circle cx="72" cy="110" r="8" fill="#ffff00"/>
+  <circle cx="120" cy="110" r="8" fill="#ff7e00"/>
+  <text x="96" y="152" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="22" fill="#00b4d8">AirSim</text>
+</svg>
