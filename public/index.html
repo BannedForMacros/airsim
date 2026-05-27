@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AirSim Monsefú — Monitoreo de Calidad del Aire</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h1>AirSim Monsefú</h1>
+      <p class="subtitle">Plataforma de Monitoreo y Simulación de Calidad del Aire Urbano</p>
+      <span class="badge">Red de sensores simulada</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="alerts-bar" id="alerts-bar"></section>
+
+    <div class="dashboard">
+      <div class="map-container">
+        <div id="map"></div>
+        <div class="map-controls">
+          <button id="btn-heatmap" class="ctrl-btn" title="Mapa de dispersión">Dispersión AQI</button>
+          <button id="btn-route" class="ctrl-btn" title="Rutas saludables">Ruta Saludable</button>
+        </div>
+        <div id="route-panel" class="route-panel hidden">
+          <h3>Rutas Saludables</h3>
+          <p class="route-instructions">Haz clic en el mapa para seleccionar <strong>origen</strong> y <strong>destino</strong>.</p>
+          <div class="route-mode">
+            <label><input type="radio" name="modo" value="caminando" checked> Caminando</label>
+            <label><input type="radio" name="modo" value="corriendo"> Corriendo</label>
+            <label><input type="radio" name="modo" value="bici"> Bicicleta</label>
+          </div>
+          <div id="route-points">
+            <p id="route-origin">Origen: <em>sin definir</em></p>
+            <p id="route-dest">Destino: <em>sin definir</em></p>
+          </div>
+          <button id="btn-calc-route" class="ctrl-btn" disabled>Calcular Ruta</button>
+          <button id="btn-clear-route" class="ctrl-btn secondary">Limpiar</button>
+          <div id="route-result" class="hidden"></div>
+        </div>
+      </div>
+
+      <aside class="sidebar">
+        <div class="panel" id="stations-panel">
+          <h2>Estaciones</h2>
+          <div id="stations-list"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Histórico PM2.5</h2>
+          <canvas id="chart-pm25"></canvas>
+        </div>
+
+        <div class="panel">
+          <h2>Histórico AQI</h2>
+          <canvas id="chart-aqi"></canvas>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer>
+    <p>AirSim Monsefú — MVP Universitario | Sensores simulados por software | Datos no oficiales</p>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
