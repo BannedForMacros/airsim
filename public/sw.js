@@ -1,12 +1,12 @@
-const CACHE_NAME = 'airsim-v1';
+const CACHE_NAME = 'airsim-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/style.css',
   '/app.js',
   '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/icons/icon-192.svg',
+  '/icons/icon-512.svg'
 ];
 
 const CDN_ASSETS = [

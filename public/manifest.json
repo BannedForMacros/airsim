@@ -4,8 +4,8 @@
   "description": "Plataforma de monitoreo y simulación de calidad del aire urbano en Monsefú, Lambayeque",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0b0f14",
-  "theme_color": "#0b0f14",
+  "background_color": "#eef2f7",
+  "theme_color": "#0284c7",
   "orientation": "any",
   "categories": ["utilities", "education"],
   "icons": [

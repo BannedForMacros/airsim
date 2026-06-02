@@ -59,6 +59,81 @@ window.addEventListener('offline', function() {
 });
 
 // ══════════════════════════════════════════
+// Notificaciones nativas (PWA)
+// ══════════════════════════════════════════
+var notificationsEnabled = false;
+
+function updateNotifyButton() {
+  var btn = document.getElementById('btn-notify');
+  if (!btn) return;
+  var label = btn.querySelector('.notify-label');
+  btn.classList.remove('enabled', 'blocked');
+
+  if (!('Notification' in window)) {
+    btn.classList.add('blocked');
+    if (label) label.textContent = 'No disponible';
+    btn.disabled = true;
+    return;
+  }
+  if (Notification.permission === 'granted' && notificationsEnabled) {
+    btn.classList.add('enabled');
+    if (label) label.textContent = 'Activadas';
+    btn.title = 'Notificaciones activadas — clic para desactivar';
+  } else if (Notification.permission === 'denied') {
+    btn.classList.add('blocked');
+    if (label) label.textContent = 'Bloqueadas';
+    btn.title = 'Permiso bloqueado en el navegador';
+  } else {
+    if (label) label.textContent = 'Notificaciones';
+    btn.title = 'Activar notificaciones de alertas';
+  }
+}
+
+function toggleNotifications() {
+  if (!('Notification' in window)) {
+    toast('No compatible', 'Tu navegador no soporta notificaciones.', 'warning');
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    notificationsEnabled = !notificationsEnabled;
+    updateNotifyButton();
+    toast(
+      notificationsEnabled ? 'Notificaciones activadas' : 'Notificaciones desactivadas',
+      notificationsEnabled ? 'Recibirás avisos de alertas de calidad del aire.' : 'Ya no recibirás avisos nativos.',
+      notificationsEnabled ? 'success' : 'info', 3500
+    );
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    toast('Permiso bloqueado', 'Habilita las notificaciones desde la configuración del navegador.', 'warning', 6000);
+    return;
+  }
+  Notification.requestPermission().then(function(perm) {
+    if (perm === 'granted') {
+      notificationsEnabled = true;
+      toast('Notificaciones activadas', 'Recibirás avisos de alertas de calidad del aire.', 'success', 3500);
+      notify('AirSim Monsefú', 'Notificaciones activadas correctamente.');
+    } else {
+      toast('Permiso no concedido', 'No se activaron las notificaciones.', 'warning');
+    }
+    updateNotifyButton();
+  });
+}
+
+function notify(title, body, tag) {
+  if (!('Notification' in window) || Notification.permission !== 'granted' || !notificationsEnabled) return;
+  try {
+    var n = new Notification(title, {
+      body: body,
+      icon: '/icons/icon-192.svg',
+      badge: '/icons/icon-192.svg',
+      tag: tag || undefined
+    });
+    n.onclick = function() { window.focus(); n.close(); };
+  } catch (e) { /* algunos navegadores requieren ServiceWorkerRegistration.showNotification */ }
+}
+
+// ══════════════════════════════════════════
 // State
 // ══════════════════════════════════════════
 var map, markers = {}, selectedStation = 'E1';
@@ -271,17 +346,19 @@ function loadHistory() {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(18,24,31,0.95)',
-          borderColor: 'rgba(255,255,255,0.08)',
+          backgroundColor: 'rgba(255,255,255,0.97)',
+          borderColor: 'rgba(15,23,42,0.10)',
           borderWidth: 1,
+          titleColor: '#1e293b',
+          bodyColor: '#475569',
           titleFont: { family: 'Inter', size: 11, weight: '600' },
           bodyFont: { family: 'Inter', size: 11 },
           padding: 10, cornerRadius: 8, displayColors: false
         }
       },
       scales: {
-        x: { ticks: { color: '#4a5568', maxTicksLimit: 6, font: { family: 'Inter', size: 10 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
-        y: { ticks: { color: '#4a5568', font: { family: 'Inter', size: 10 } }, grid: { color: 'rgba(255,255,255,0.03)' } }
+        x: { ticks: { color: '#94a3b8', maxTicksLimit: 6, font: { family: 'Inter', size: 10 } }, grid: { color: 'rgba(15,23,42,0.05)' } },
+        y: { ticks: { color: '#94a3b8', font: { family: 'Inter', size: 10 } }, grid: { color: 'rgba(15,23,42,0.05)' } }
       },
       elements: { point: { radius: 0, hoverRadius: 4 } }
     };
@@ -336,6 +413,7 @@ function loadAlerts() {
           a.type === 'danger' ? 'danger' : 'warning',
           10000
         );
+        notify('⚠ ' + a.stationName, a.message, key);
       }
     });
     previousAlertKeys = newKeys;
@@ -522,6 +600,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-route').addEventListener('click', toggleRouteMode);
     document.getElementById('btn-calc-route').addEventListener('click', calcRoute);
     document.getElementById('btn-clear-route').addEventListener('click', clearRoute);
+    document.getElementById('btn-close-route').addEventListener('click', toggleRouteMode);
+    document.getElementById('btn-notify').addEventListener('click', toggleNotifications);
+    updateNotifyButton();
 
     toast('AirSim Monsefú', 'Plataforma iniciada. Datos en tiempo real.', 'success', 4000);
 
