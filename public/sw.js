@@ -1,4 +1,4 @@
-const CACHE_NAME = 'airsim-v3';
+const CACHE_NAME = 'airsim-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

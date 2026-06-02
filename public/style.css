@@ -856,8 +856,6 @@ footer {
 
   .header-content { flex-wrap: wrap; gap: 8px; }
   .badge { margin-left: 0; }
-  .notify-btn { margin-left: auto; }
-  .notify-btn .notify-label { display: none; }
   .sidebar { max-height: none; }
 }
 
@@ -865,6 +863,44 @@ footer {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
 }
+
+/* Centro de notificaciones: en móvil se vuelve bottom sheet a todo el ancho
+   para que el contenido nunca se corte por los bordes de la pantalla */
+@media (max-width: 600px) {
+  .notif-center { position: static; }
+
+  .notif-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    max-width: none;
+    max-height: 75vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 18px 18px 0 0;
+    box-shadow: 0 -8px 32px rgba(15,23,42,0.22);
+    animation: sheetUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 2000;
+  }
+  .notif-list { max-height: none; flex: 1; }
+}
+
+/* Fondo oscurecido detrás del bottom sheet de notificaciones (solo móvil) */
+.notif-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.4);
+  z-index: 1900;
+  animation: fadeIn 0.25s ease;
+}
+@media (max-width: 600px) {
+  .notif-backdrop.show { display: block; }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 @media (max-width: 480px) {
   main { padding: 8px; }
