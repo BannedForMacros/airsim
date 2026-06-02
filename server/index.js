@@ -7,6 +7,7 @@ const cors = require('cors');
 const apiRoutes = require('./routes/api');
 const Station = require('./models/Station');
 const { STATIONS, startSimulation } = require('./simulation/simulator');
+const push = require('./push');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -44,6 +45,9 @@ async function start() {
 
     await seedStations();
     startSimulation();
+
+    push.initPush();
+    push.startAlertWatcher(60000);
 
     app.listen(PORT, () => {
       console.log(`[Server] AirSim Monsefú corriendo en http://localhost:${PORT}`);

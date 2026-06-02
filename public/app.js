@@ -4,6 +4,10 @@
 function toast(title, message, type, duration) {
   type = type || 'info';
   duration = duration || 6000;
+
+  // Registrar en el historial del centro de notificaciones
+  if (typeof addNotification === 'function') addNotification(title, message, type);
+
   var container = document.getElementById('toast-container');
   if (!container) return;
 
@@ -46,8 +50,12 @@ function dismissToast(el) {
 // ══════════════════════════════════════════
 // PWA
 // ══════════════════════════════════════════
+var swRegistration = null;
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(function() {});
+  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+    swRegistration = reg;
+    refreshPushState();
+  }).catch(function() {});
 }
 window.addEventListener('online', function() {
   document.getElementById('offline-banner').classList.add('hidden');
@@ -59,78 +67,221 @@ window.addEventListener('offline', function() {
 });
 
 // ══════════════════════════════════════════
-// Notificaciones nativas (PWA)
+// Centro de Notificaciones (historial + push)
 // ══════════════════════════════════════════
-var notificationsEnabled = false;
+var notifHistory = [];
+var notifUnread = 0;
+var notifPanelOpen = false;
+var pushSubscribed = false;
+var NOTIF_STORE_KEY = 'airsim_notif_history';
 
-function updateNotifyButton() {
-  var btn = document.getElementById('btn-notify');
-  if (!btn) return;
-  var label = btn.querySelector('.notify-label');
-  btn.classList.remove('enabled', 'blocked');
-
-  if (!('Notification' in window)) {
-    btn.classList.add('blocked');
-    if (label) label.textContent = 'No disponible';
-    btn.disabled = true;
-    return;
-  }
-  if (Notification.permission === 'granted' && notificationsEnabled) {
-    btn.classList.add('enabled');
-    if (label) label.textContent = 'Activadas';
-    btn.title = 'Notificaciones activadas — clic para desactivar';
-  } else if (Notification.permission === 'denied') {
-    btn.classList.add('blocked');
-    if (label) label.textContent = 'Bloqueadas';
-    btn.title = 'Permiso bloqueado en el navegador';
-  } else {
-    if (label) label.textContent = 'Notificaciones';
-    btn.title = 'Activar notificaciones de alertas';
-  }
+function loadNotifHistory() {
+  try {
+    var raw = localStorage.getItem(NOTIF_STORE_KEY);
+    if (raw) notifHistory = JSON.parse(raw) || [];
+  } catch (e) { notifHistory = []; }
 }
 
-function toggleNotifications() {
-  if (!('Notification' in window)) {
-    toast('No compatible', 'Tu navegador no soporta notificaciones.', 'warning');
-    return;
-  }
-  if (Notification.permission === 'granted') {
-    notificationsEnabled = !notificationsEnabled;
-    updateNotifyButton();
-    toast(
-      notificationsEnabled ? 'Notificaciones activadas' : 'Notificaciones desactivadas',
-      notificationsEnabled ? 'Recibirás avisos de alertas de calidad del aire.' : 'Ya no recibirás avisos nativos.',
-      notificationsEnabled ? 'success' : 'info', 3500
-    );
-    return;
-  }
-  if (Notification.permission === 'denied') {
-    toast('Permiso bloqueado', 'Habilita las notificaciones desde la configuración del navegador.', 'warning', 6000);
-    return;
-  }
-  Notification.requestPermission().then(function(perm) {
-    if (perm === 'granted') {
-      notificationsEnabled = true;
-      toast('Notificaciones activadas', 'Recibirás avisos de alertas de calidad del aire.', 'success', 3500);
-      notify('AirSim Monsefú', 'Notificaciones activadas correctamente.');
-    } else {
-      toast('Permiso no concedido', 'No se activaron las notificaciones.', 'warning');
-    }
-    updateNotifyButton();
+function saveNotifHistory() {
+  try { localStorage.setItem(NOTIF_STORE_KEY, JSON.stringify(notifHistory.slice(0, 50))); } catch (e) {}
+}
+
+// Registra una notificación en el historial (se llama desde toast()).
+function addNotification(title, message, type) {
+  notifHistory.unshift({
+    title: title,
+    message: message,
+    type: type || 'info',
+    time: Date.now(),
+    read: notifPanelOpen
+  });
+  if (notifHistory.length > 50) notifHistory = notifHistory.slice(0, 50);
+  if (!notifPanelOpen) notifUnread++;
+  saveNotifHistory();
+  renderNotifications();
+  updateNotifBadge();
+}
+
+function timeAgo(ts) {
+  var diff = Math.floor((Date.now() - ts) / 1000);
+  if (diff < 60) return 'hace un momento';
+  if (diff < 3600) return 'hace ' + Math.floor(diff / 60) + ' min';
+  if (diff < 86400) return 'hace ' + Math.floor(diff / 3600) + ' h';
+  var d = new Date(ts);
+  return d.getDate() + '/' + (d.getMonth() + 1) + ' ' +
+    String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
   });
 }
 
-function notify(title, body, tag) {
-  if (!('Notification' in window) || Notification.permission !== 'granted' || !notificationsEnabled) return;
-  try {
-    var n = new Notification(title, {
-      body: body,
-      icon: '/icons/icon-192.svg',
-      badge: '/icons/icon-192.svg',
-      tag: tag || undefined
+function renderNotifications() {
+  var list = document.getElementById('notif-list');
+  if (!list) return;
+  if (!notifHistory.length) {
+    list.innerHTML = '<div class="notif-empty">No hay notificaciones todavía.</div>';
+    return;
+  }
+  list.innerHTML = notifHistory.map(function(n) {
+    return '<div class="notif-item ' + n.type + (n.read ? '' : ' unread') + '">' +
+      '<div class="notif-item-dot"></div>' +
+      '<div class="notif-item-body">' +
+        '<div class="notif-item-title">' + escapeHtml(n.title) + '</div>' +
+        '<div class="notif-item-msg">' + escapeHtml(n.message) + '</div>' +
+        '<div class="notif-item-time">' + timeAgo(n.time) + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function updateNotifBadge() {
+  var count = document.getElementById('notify-count');
+  var btn = document.getElementById('btn-notify');
+  if (!count) return;
+  if (notifUnread > 0) {
+    count.textContent = notifUnread > 99 ? '99+' : notifUnread;
+    count.classList.remove('hidden');
+    if (btn) {
+      btn.classList.add('has-unread');
+      setTimeout(function() { btn.classList.remove('has-unread'); }, 700);
+    }
+  } else {
+    count.classList.add('hidden');
+  }
+}
+
+function toggleNotifPanel() {
+  var panel = document.getElementById('notif-panel');
+  if (!panel) return;
+  notifPanelOpen = !notifPanelOpen;
+  panel.classList.toggle('hidden', !notifPanelOpen);
+  if (notifPanelOpen) {
+    notifUnread = 0;
+    notifHistory.forEach(function(n) { n.read = true; });
+    saveNotifHistory();
+    renderNotifications();
+    updateNotifBadge();
+  }
+}
+
+function clearNotifications() {
+  notifHistory = [];
+  notifUnread = 0;
+  saveNotifHistory();
+  renderNotifications();
+  updateNotifBadge();
+}
+
+// ── Web Push ──
+function urlBase64ToUint8Array(base64String) {
+  var padding = '='.repeat((4 - base64String.length % 4) % 4);
+  var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  var raw = atob(base64);
+  var arr = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr;
+}
+
+function pushSupported() {
+  return ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window);
+}
+
+function updatePushButton() {
+  var btn = document.getElementById('btn-push-toggle');
+  var state = document.getElementById('notif-push-state');
+  if (!btn) return;
+
+  if (!pushSupported()) {
+    btn.textContent = 'No disponible';
+    btn.disabled = true;
+    btn.className = 'push-toggle blocked';
+    if (state) state.textContent = 'Tu navegador no soporta notificaciones push';
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    btn.textContent = 'Bloqueado';
+    btn.className = 'push-toggle blocked';
+    if (state) state.textContent = 'Permiso bloqueado en el navegador';
+    return;
+  }
+  if (pushSubscribed) {
+    btn.textContent = 'Activado';
+    btn.className = 'push-toggle active';
+    btn.disabled = false;
+    if (state) state.textContent = 'Recibirás alertas aunque cierres la app';
+  } else {
+    btn.textContent = 'Activar';
+    btn.className = 'push-toggle';
+    btn.disabled = false;
+    if (state) state.textContent = 'Recibe avisos aunque cierres la app';
+  }
+}
+
+function refreshPushState() {
+  if (!pushSupported() || !swRegistration) return Promise.resolve();
+  return swRegistration.pushManager.getSubscription().then(function(sub) {
+    pushSubscribed = !!sub;
+    updatePushButton();
+  });
+}
+
+function togglePush() {
+  if (!pushSupported()) {
+    toast('No compatible', 'Tu navegador no soporta notificaciones push.', 'warning');
+    return;
+  }
+  if (!swRegistration) {
+    toast('Un momento', 'El servicio aún se está inicializando, intenta de nuevo.', 'info');
+    return;
+  }
+  if (pushSubscribed) {
+    swRegistration.pushManager.getSubscription().then(function(sub) {
+      if (!sub) return;
+      var endpoint = sub.endpoint;
+      sub.unsubscribe().then(function() {
+        fetch('/api/push/unsubscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ endpoint: endpoint })
+        }).catch(function() {});
+        pushSubscribed = false;
+        updatePushButton();
+        toast('Push desactivado', 'Ya no recibirás alertas con la app cerrada.', 'info', 3500);
+      });
     });
-    n.onclick = function() { window.focus(); n.close(); };
-  } catch (e) { /* algunos navegadores requieren ServiceWorkerRegistration.showNotification */ }
+    return;
+  }
+
+  Notification.requestPermission().then(function(perm) {
+    if (perm !== 'granted') {
+      toast('Permiso no concedido', 'No se activaron las notificaciones push.', 'warning');
+      updatePushButton();
+      return;
+    }
+    fetchJSON('/api/push/key').then(function(data) {
+      return swRegistration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(data.publicKey)
+      });
+    }).then(function(sub) {
+      return fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sub)
+      });
+    }).then(function() {
+      pushSubscribed = true;
+      updatePushButton();
+      toast('Push activado', 'Recibirás alertas aunque cierres la app o bloquees el celular.', 'success', 4500);
+    }).catch(function(err) {
+      console.warn('[Push]', err);
+      toast('Error', 'No se pudo activar el push.', 'danger');
+      updatePushButton();
+    });
+  });
 }
 
 // ══════════════════════════════════════════
@@ -413,7 +564,6 @@ function loadAlerts() {
           a.type === 'danger' ? 'danger' : 'warning',
           10000
         );
-        notify('⚠ ' + a.stationName, a.message, key);
       }
     });
     previousAlertKeys = newKeys;
@@ -601,8 +751,28 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-calc-route').addEventListener('click', calcRoute);
     document.getElementById('btn-clear-route').addEventListener('click', clearRoute);
     document.getElementById('btn-close-route').addEventListener('click', toggleRouteMode);
-    document.getElementById('btn-notify').addEventListener('click', toggleNotifications);
-    updateNotifyButton();
+
+    // Centro de notificaciones
+    loadNotifHistory();
+    renderNotifications();
+    notifUnread = notifHistory.filter(function(n) { return !n.read; }).length;
+    updateNotifBadge();
+    updatePushButton();
+    refreshPushState();
+
+    document.getElementById('btn-notify').addEventListener('click', function(e) {
+      e.stopPropagation();
+      toggleNotifPanel();
+    });
+    document.getElementById('notif-clear').addEventListener('click', clearNotifications);
+    document.getElementById('btn-push-toggle').addEventListener('click', togglePush);
+
+    // Cerrar el panel al hacer clic fuera
+    document.addEventListener('click', function(e) {
+      if (!notifPanelOpen) return;
+      var center = document.querySelector('.notif-center');
+      if (center && !center.contains(e.target)) toggleNotifPanel();
+    });
 
     toast('AirSim Monsefú', 'Plataforma iniciada. Datos en tiempo real.', 'success', 4000);
 

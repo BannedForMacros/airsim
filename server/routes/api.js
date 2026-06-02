@@ -6,6 +6,7 @@ const { calculateAQI } = require('../prediction/aqi');
 const { predictForStation } = require('../prediction/regression');
 const { generateHeatmapGrid, interpolateRoute } = require('../prediction/idw');
 const { STATIONS } = require('../simulation/simulator');
+const push = require('../push');
 
 router.get('/stations', async (req, res) => {
   try {
@@ -145,6 +146,47 @@ router.post('/route', async (req, res) => {
       recomendacion: recommendation,
       puntos: routePoints
     });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Web Push ──
+router.get('/push/key', (req, res) => {
+  const key = push.getPublicKey();
+  if (!key) return res.status(503).json({ error: 'Push no disponible' });
+  res.json({ publicKey: key });
+});
+
+router.post('/push/subscribe', async (req, res) => {
+  try {
+    await push.saveSubscription(req.body);
+    res.status(201).json({ ok: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+router.post('/push/unsubscribe', async (req, res) => {
+  try {
+    await push.removeSubscription(req.body && req.body.endpoint);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// Endpoint de prueba: envía una notificación push a todos los suscriptores
+router.post('/push/test', async (req, res) => {
+  try {
+    const result = await push.broadcast({
+      title: 'AirSim Monsefú',
+      body: 'Notificación de prueba — el push funciona correctamente.',
+      type: 'info',
+      tag: 'test',
+      url: '/'
+    });
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
