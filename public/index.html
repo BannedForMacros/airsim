@@ -6,7 +6,7 @@
   <title>AirSim Monsefú — Monitoreo de Calidad del Aire</title>
 
   <!-- PWA -->
-  <meta name="theme-color" content="#0b0f14">
+  <meta name="theme-color" content="#0284c7">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="AirSim">
@@ -27,6 +27,10 @@
         <h1>Air<span>Sim</span> Monsefú</h1>
       </div>
       <p class="subtitle">Monitoreo y Simulación de Calidad del Aire Urbano</p>
+      <button id="btn-notify" class="notify-btn" title="Activar notificaciones de alertas">
+        <svg class="notify-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"/><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/></svg>
+        <span class="notify-label">Notificaciones</span>
+      </button>
       <span class="badge">Sensores simulados · PWA</span>
     </div>
   </header>
@@ -40,11 +44,26 @@
       <div class="map-container">
         <div id="map"></div>
         <div class="map-controls">
-          <button id="btn-heatmap" class="ctrl-btn">Dispersión</button>
-          <button id="btn-route" class="ctrl-btn">Ruta Saludable</button>
+          <button id="btn-heatmap" class="ctrl-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+            <span>Dispersión</span>
+          </button>
+          <button id="btn-route" class="ctrl-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+            <span>Ruta Saludable</span>
+          </button>
         </div>
         <div id="route-panel" class="route-panel hidden">
-          <h3>Ruta Saludable</h3>
+          <div class="route-handle"></div>
+          <div class="route-header">
+            <h3>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+              Ruta Saludable
+            </h3>
+            <button id="btn-close-route" class="route-close" aria-label="Cerrar panel de ruta">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+          </div>
           <p class="route-instructions" id="route-instructions">Haz clic en el mapa para seleccionar el <strong>punto de origen</strong>.</p>
           <div class="route-mode">
             <label><input type="radio" name="modo" value="caminando" checked> Caminando</label>

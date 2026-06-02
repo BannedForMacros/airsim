@@ -3,27 +3,27 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg: #0b0f14;
-  --surface: #12181f;
-  --surface2: #1a2230;
-  --surface3: #222d3a;
-  --border: rgba(255,255,255,0.06);
-  --border-hover: rgba(255,255,255,0.12);
-  --text: #e8ecf1;
-  --text2: #7a8a9e;
-  --text3: #4a5568;
-  --accent: #38bdf8;
+  --bg: #eef2f7;
+  --surface: #ffffff;
+  --surface2: #f3f6fa;
+  --surface3: #e7edf4;
+  --border: rgba(15,23,42,0.08);
+  --border-hover: rgba(15,23,42,0.16);
+  --text: #1e293b;
+  --text2: #64748b;
+  --text3: #94a3b8;
+  --accent: #0284c7;
   --accent2: #0ea5e9;
-  --accent-glow: rgba(56, 189, 248, 0.12);
-  --good: #34d399;
-  --moderate: #fbbf24;
-  --sensitive: #fb923c;
-  --unhealthy: #f87171;
-  --very-unhealthy: #a78bfa;
-  --hazardous: #dc2626;
+  --accent-glow: rgba(2, 132, 199, 0.10);
+  --good: #10b981;
+  --moderate: #f59e0b;
+  --sensitive: #f97316;
+  --unhealthy: #ef4444;
+  --very-unhealthy: #8b5cf6;
+  --hazardous: #b91c1c;
   --radius: 12px;
   --radius-sm: 8px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.2);
+  --shadow: 0 1px 2px rgba(15,23,42,0.06), 0 6px 20px rgba(15,23,42,0.08);
   --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -212,8 +212,55 @@ header {
   display: none;
 }
 
-.badge {
+.notify-btn {
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border: 1px solid var(--border-hover);
+  background: var(--surface);
+  color: var(--text2);
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: all var(--transition);
+  box-shadow: var(--shadow);
+}
+.notify-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.notify-btn .notify-icon { flex-shrink: 0; transition: transform var(--transition); }
+.notify-btn:hover .notify-icon { transform: rotate(-12deg); }
+
+/* Estado: notificaciones activas */
+.notify-btn.enabled {
+  background: var(--accent-glow);
+  border-color: rgba(2,132,199,0.25);
+  color: var(--accent);
+}
+.notify-btn.enabled .notify-icon { animation: bellRing 0.6s ease; }
+
+/* Estado: bloqueadas por el navegador */
+.notify-btn.blocked {
+  color: var(--unhealthy);
+  border-color: rgba(239,68,68,0.25);
+}
+
+@keyframes bellRing {
+  0%,100% { transform: rotate(0); }
+  20% { transform: rotate(-14deg); }
+  40% { transform: rotate(11deg); }
+  60% { transform: rotate(-7deg); }
+  80% { transform: rotate(4deg); }
+}
+
+.badge {
+  margin-left: 0;
   padding: 4px 12px;
   font-size: 0.65rem;
   background: var(--accent-glow);
@@ -265,18 +312,22 @@ main {
 }
 
 .ctrl-btn {
-  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
   border: 1px solid var(--border-hover);
-  background: rgba(18, 24, 31, 0.9);
-  color: var(--text2);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  font-size: 0.75rem;
-  font-weight: 500;
+  font-size: 0.78rem;
+  font-weight: 600;
   font-family: inherit;
   transition: all var(--transition);
   backdrop-filter: blur(12px);
   letter-spacing: 0.2px;
+  box-shadow: var(--shadow);
 }
 
 .ctrl-btn:hover {
@@ -296,7 +347,7 @@ main {
 
 .ctrl-btn.active {
   background: var(--accent);
-  color: #000;
+  color: #fff;
   border-color: var(--accent);
   font-weight: 600;
 }
@@ -307,7 +358,7 @@ main {
   bottom: 12px;
   left: 12px;
   z-index: 1000;
-  background: rgba(18, 24, 31, 0.95);
+  background: rgba(255, 255, 255, 0.97);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 16px;
@@ -360,7 +411,7 @@ main {
 
 .route-mode label:has(input:checked) {
   background: var(--accent);
-  color: #000;
+  color: #fff;
 }
 
 .route-mode input { display: none; }
@@ -593,13 +644,13 @@ footer {
 /* ── Leaflet overrides ── */
 .leaflet-control-attribution { font-size: 9px !important; opacity: 0.5; }
 .leaflet-popup-content-wrapper {
-  background: var(--surface2) !important;
+  background: #ffffff !important;
   color: var(--text) !important;
   border-radius: var(--radius-sm) !important;
   box-shadow: var(--shadow) !important;
   border: 1px solid var(--border) !important;
 }
-.leaflet-popup-tip { background: var(--surface2) !important; }
+.leaflet-popup-tip { background: #ffffff !important; }
 .leaflet-popup-content { font-family: 'Inter', sans-serif !important; font-size: 0.78rem !important; }
 
 /* ── Animations ── */
