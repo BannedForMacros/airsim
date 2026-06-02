@@ -165,8 +165,7 @@ header {
   padding: 16px 24px;
   position: sticky;
   top: 0;
-  z-index: 100;
-  backdrop-filter: blur(12px);
+  z-index: 1500;
 }
 
 .header-content {
@@ -864,32 +863,34 @@ footer {
   to   { transform: translateY(0); }
 }
 
-/* Centro de notificaciones: en móvil se muestra como tarjeta centrada
-   (estilo modal) para que el contenido nunca se corte por los bordes */
+/* Centro de notificaciones: en móvil baja desde la campana, a todo el ancho
+   de la pantalla (con márgenes) para que el contenido nunca se corte */
 @media (max-width: 600px) {
   .notif-center { position: static; }
+  .badge { display: none; }
 
   .notif-panel {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: calc(100vw - 24px);
-    max-width: 440px;
-    max-height: 80vh;
+    top: 64px;
+    left: 12px;
+    right: 12px;
+    bottom: auto;
+    width: auto;
+    max-width: none;
+    max-height: calc(100vh - 80px);
     display: flex;
     flex-direction: column;
     border-radius: var(--radius);
-    box-shadow: 0 24px 60px rgba(15,23,42,0.35);
-    animation: notifIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 16px 50px rgba(15,23,42,0.30);
+    animation: notifDrop 0.24s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 2000;
   }
   .notif-list { max-height: none; flex: 1; }
 }
 
-@keyframes notifIn {
-  from { opacity: 0; transform: translate(-50%, -46%) scale(0.96); }
-  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+@keyframes notifDrop {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 480px) {
