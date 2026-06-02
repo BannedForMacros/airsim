@@ -158,8 +158,6 @@ function toggleNotifPanel() {
   if (!panel) return;
   notifPanelOpen = !notifPanelOpen;
   panel.classList.toggle('hidden', !notifPanelOpen);
-  var backdrop = document.getElementById('notif-backdrop');
-  if (backdrop) backdrop.classList.toggle('show', notifPanelOpen);
   if (notifPanelOpen) {
     notifUnread = 0;
     notifHistory.forEach(function(n) { n.read = true; });

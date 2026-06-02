@@ -864,43 +864,33 @@ footer {
   to   { transform: translateY(0); }
 }
 
-/* Centro de notificaciones: en móvil se vuelve bottom sheet a todo el ancho
-   para que el contenido nunca se corte por los bordes de la pantalla */
+/* Centro de notificaciones: en móvil se muestra como tarjeta centrada
+   (estilo modal) para que el contenido nunca se corte por los bordes */
 @media (max-width: 600px) {
   .notif-center { position: static; }
 
   .notif-panel {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: auto;
-    width: 100%;
-    max-width: none;
-    max-height: 75vh;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(100vw - 24px);
+    max-width: 440px;
+    max-height: 80vh;
     display: flex;
     flex-direction: column;
-    border-radius: 18px 18px 0 0;
-    box-shadow: 0 -8px 32px rgba(15,23,42,0.22);
-    animation: sheetUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: var(--radius);
+    box-shadow: 0 24px 60px rgba(15,23,42,0.35);
+    animation: notifIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 2000;
   }
   .notif-list { max-height: none; flex: 1; }
 }
 
-/* Fondo oscurecido detrás del bottom sheet de notificaciones (solo móvil) */
-.notif-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(15,23,42,0.4);
-  z-index: 1900;
-  animation: fadeIn 0.25s ease;
+@keyframes notifIn {
+  from { opacity: 0; transform: translate(-50%, -46%) scale(0.96); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
-@media (max-width: 600px) {
-  .notif-backdrop.show { display: block; }
-}
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 @media (max-width: 480px) {
   main { padding: 8px; }
